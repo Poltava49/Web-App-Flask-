@@ -25,6 +25,7 @@ wheels/
 .vscode/
 *.swp
 *.swo
+.idea
 
 # Файлы окружения
 .env
