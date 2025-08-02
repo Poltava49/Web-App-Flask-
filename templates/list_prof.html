@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% set profession=['инженер-исследователь', 'пилот', 'строитель', 'экзобиолог', 'врач', 'климатолог', 'инженер', 'штурман'] %}
+    <h3>Список профессий</h3>
+    <{{ tag }}>
+        {% for prof in profession %}
+            <li>{{ prof }}</li>
+        {% endfor %}
+    </{{ tag }}>
+{% endblock %}

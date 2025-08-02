@@ -1,0 +1,35 @@
+#grey_title {
+background-color : grey;
+}
+
+#red_title {
+    background-color : red;
+}
+
+#green_title {
+    background-color : green;
+}
+
+#yellow_title {
+    background-color : yellow;
+}
+
+h1 {
+    color: red;
+}
+
+div {
+    width: 44.4%;
+    margin: 2px;
+}
+
+img {
+    width: 1000%;
+}
+
+.step {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
