@@ -18,6 +18,17 @@ h1 {
     color: red;
 }
 
+h4 {
+    color:grey;
+    margin-left: 20px;
+}
+
+.lists {
+    margin-left: 20%;
+    margin-bottom: 1%;
+}
+
+
 div {
     width: 44.4%;
     margin: 2px;

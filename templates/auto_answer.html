@@ -1,8 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% for form in forms %}
-        {{ form }}
+
+
+
+    {% set list_keys=['Фамилия', 'Имя', 'Почта', 'Образование', 'Список профессий' , 'Пол', 'Почему Вы хотите принять участие в миссии?', 'Файл', 'Готовы остаться на Марсе?']%}
+<!--    {% set profession={'first-prof': 'Инженер-исследователь','second-prof':'Инженер-строитель','third-prof':'Пилот','fourth-prof':'Метеоролог','fifth-prof':'Инженер по жизнеобеспечению','six-prof':'Инженер по радиационной защите','seven-prof':'Врач','eight-prof':'Экзобиолог'}%}-->
+    {% for i in range(keys|length) %}
+        {%if form[i] == 'on'%}
+             <div class="lists">{{ list_keys[i] }} - {{ 'Да' }}</div></br>
+        {%else %}
+           <div class="lists"> {{ list_keys[i] }} - {{ form[i] }}</div></br>
+
+
+        {% endif %}
         {% endfor %}
 
 {% endblock %}

@@ -1,10 +1,69 @@
 from flask import Flask, render_template, url_for, request, redirect
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, SelectMultipleField, RadioField
+from wtforms.fields.simple import EmailField
 from wtforms.validators import DataRequired
+from wtforms.widgets import ListWidget, CheckboxInput
 
 
 app = Flask(__name__)
+
+
+# class MultiCheckboxField(SelectMultipleField):
+#     widget = ListWidget(prefix_label=False)
+#     option_widget = CheckboxInput()
+#
+#
+# class LoginForm(FlaskForm):
+#     name = StringField('Имя', validators=[DataRequired()])
+#     name = StringField('Фамилия', validators=[DataRequired()])
+#     password = EmailField("Email: ", validators=[DataRequired()])
+#     remember_me = BooleanField('Запомнить меня')
+#     submit = SubmitField('Войти')
+#
+#
+# class OrderForm(FlaskForm):
+#     graduation = SelectField('Образование', choices=[
+#         ('first', 'Среднее общеобразовательное'),
+#         ('first_prof', 'Среднее профессиональное'),
+#         ('high_first', 'Высшее неполное'),
+#         ('high_second', 'Высшее полное')
+#     ])
+#
+# class InterestsForm(FlaskForm):
+#     interests = MultiCheckboxField('Ваши интересы', choices=[
+#         ('engineer', 'Инженер-исследователь'),
+#         ('build', 'Инженер-строитель'),
+#         ('pilot', 'Пилот'),
+#         ('meteo', 'Метеоролог'),
+#         ('life', 'Инженер по жизнеобеспечению'),
+#         ('radio', 'Инженер по радиационной защите'),
+#         ('doctor', 'Врач'),
+#         ('biologist', 'Экзобиолог')
+#     ])
+
+
+# class GenderForm(FlaskForm):
+#     gender = RadioField('Ваш пол',
+#                       choices=[('male', 'Мужской'), ('female', 'Женский')],
+#                       validators=[DataRequired(message="Выберите пол")])
+
+
+
+# class AccessForm(FlaskForm):
+#     username = StringField('id астронавта', validators=[DataRequired()])
+#     password = PasswordField('Пароль астронавта', validators=[DataRequired()])
+#     remember_me = BooleanField('id капитана')
+#     submit = SubmitField('Пароль капитана')
+
+
+#Двойная защита
+@app.route('/access', methods=['GET', 'POST'])
+def access():
+    form_access = AccessForm()
+    if form_access.validate_on_submit():
+        return redirect('/success')
+    return render_template('login.html', title='Авторизация', form=form_access)
 
 
 @app.route('/<title>')
@@ -32,7 +91,19 @@ def list_prof(type):
 
 
 
-@app.route('/form', methods=["GET", "POST"])
+# @app.route('/form', methods=["GET", "POST"])
+# def login():
+#     if request.method == 'GET':
+#         form_login = LoginForm()
+#         form_order = MultiCheckboxField()
+#         form_inter = InterestsForm()
+#         form_list = MultiCheckboxField()
+#         sex_form = GenderForm()
+#         return redirect('/success')
+#         # return render_template('login.html', title='Авторизация', form=form)
+
+
+
 def astronaut_survey():
     if request.method == 'GET':
         return
@@ -41,38 +112,19 @@ def astronaut_survey():
         return redirect('/answer')
 
 
-
-
-@app.route('/form/', methods=['GET', 'POST'])
-def render_form():
-    form = MyForm()
-    if form.validate_on_submit():
-        output = render_template('form-success.html', form=form)
-        return output
-    else:
-        output = render_template('form.html', form=form)
-        return output
-
-
 @app.route('/answer')
 def answer(forms):
     return render_template('auto_answer.html', forms = forms)
-
-
-from flask import Flask, url_for, request
-
-app = Flask(__name__)
-
 
 
 @app.route('/')
 def title():
     return f"<title>Миссия Колонизация Марса</title>"
 
-
-@app.route('/index')
-def index():
-    return f"<title>Миссия Колонизация Марса</title><h1>И на Марсе будут яблони цвести!</h1>"
+#
+# @app.route('/index')
+# def index():
+#     return f"<title>Миссия Колонизация Марса</title><h1>И на Марсе будут яблони цвести!</h1>"
 
 
 @app.route('/promotion')
@@ -135,90 +187,97 @@ def promoted_image():
 </body>''')
 
 
+#Шаблон формы и автоматический ответ
+
 @app.route('/form', methods=["GET", "POST"])
 def astronaut_survey():
     if request.method == 'GET':
-        return f'''<!doctype html>
+        return f"""<!doctype html>
                         <html lang="en">
                           <head>
                             <meta charset="utf-8">
                             <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-                            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" />
-                            <link rel="stylesheet" type="text/css" href="{url_for('static', filename='css/style_form.css')}" />
+                            <link rel="stylesheet"
+                            href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
+                            integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+                            crossorigin="anonymous">
                             <title>Отбор астронавтов</title>
-                            </head>
-                            <body>
+                            <style>
+                            
+                            </style>
+                          </head>
+                          <body>
                             <h1>Анкета претендента</h1>
                             <h2>на участие в миссии</h2>
-                            <form class="login_form" method="post">
-                             <input type="surname"  placeholder="Введите фамилию"> <br>
-                             <input type="name"  placeholder="Введите имя"><br>
-                             <input type="email"  placeholder="Введите адрес почты"><br>
                              <div class="form-group">
-                                        <label for="classSelect">Какое у Вас образование?</label>
-                                        <select class="form-control" id="classSelect" name="class">
-                                          <option>Начальное</option>
-                                          <option>Среднее общеобразовательное</option>
-                                          <option>Среднее профессиональное</option>
-                                          <option>Высшее неполное</option>
-                                          <option>Высшее полное</option>
-                                        </select>
-                                        <label for="form-group form-check">Какие у Вас есть профессии?</label>
-                                        <div class="form-group form-check">
-                                            <input type="checkbox" name="first-prof"> 
-                                            <label class="form-check-label" for="first-prof">Инженер-исследователь</label><br>
-                                            <input type="checkbox" name="second-prof">
-                                            <label class="form-check-label" for="second-prof">Инженер-строитель</label><br>
-                                            <input type="checkbox" name="third-prof">
-                                            <label class="form-check-label" for="third-prof">Пилот</label><br>
-                                            <input type="checkbox" name="fourth-prof">
-                                            <label class="form-check-label" for="fourth-prof">Метеоролог</label><br>
-                                            <input type="checkbox" name="fifth-prof">
-                                            <label class="form-check-label" for="fifth-prof">Инженер по жизнеобеспечению</label><br>
-                                            <input type="checkbox" name="six-prof">
-                                            <label class="form-check-label" for="six-prof">Инженер по радиационной защите</label><br>
-                                            <input type="checkbox" name="seven-prof">
-                                            <label class="form-check-label" for="seven-prof">Врач</label><br>
-                                            <input type="checkbox" name="eight-prof">
-                                            <label class="form-check-label" for="eight-prof">Экзобиолог</label><br>
-                                        </div>
-                                        <div class="form-group">
-                                        <label for="form-check">Укажите пол</label>
-                                        <div class="form-check">
-                                          <input class="form-check-input" type="radio" name="sex" id="male" value="male" checked>
-                                          <label class="form-check-label" for="male">
-                                            Мужской
-                                          </label>
-                                        </div>
-                                        <div class="form-check">
-                                          <input class="form-check-input" type="radio" name="sex" id="female" value="female">
-                                          <label class="form-check-label" for="female">
-                                            Женский
-                                          </label>
-                                        </div>
-                                        <div class="form-group">
-                                        <label for="about">Почему Вы хотите принять участие в миссии?</label>
-                                        <textarea name="about" rows="3"></textarea>
-                                        </div>
-                                        <div class="form-group">
-                                        <label for="photo">Приложите фотографию</label>
-                                        <input type="file" class="form-control-file" id="photo" name="file">
-                                        </div>
-                                        <div class="form-check">
-                                          <input type="radio" name="fin_question">
-                                          <label for="fin_question">
-                                            Готовы остаться на Марсе?
-                                          </label>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary">Отправить</button>
-                                     </div>
-
-                            </form>
-                            </body>        
-'''
+                                <form class="form-control" method="post" >
+                                     <input name="surname" class="form-control" id="surname"  placeholder="Введите фамилию" > <br>
+                                     <input name="name" class="form-control" placeholder="Введите имя"><br>
+                                     <input name="email" class="form-control" placeholder="Введите адрес почты"><br>
+                                    <label for="classSelect">Какое у Вас образование?</label>
+                                    <select class="form-control" id="classSelect" name="class">
+                                      <option>Начальное</option>
+                                      <option>Среднее общеобразовательное</option>
+                                      <option>Среднее профессиональное</option>
+                                      <option>Высшее неполное</option>
+                                      <option>Высшее полное</option>
+                                    </select>
+                                    <label for="form-group form-check">Какие у Вас есть профессии?</label>
+                                    <div name = prof_list class="form-control" form-check">
+                                        <input type="checkbox" name="profession"> 
+                                        <label class="form-check-label" name=""profession"  value="Инженер-исследователь">Инженер-исследователь</label><br>
+                                        <input type="checkbox" name="profession value="designer">
+                                        <label class="form-check-label" for="profession">Инженер-строитель</label><br>
+                                        <input type="checkbox" name="profession">
+                                        <label class="form-check-label" for="profession">Пилот</label><br>
+                                        <input type="checkbox" name="profession">
+                                        <label class="form-check-label" for="profession">Метеоролог</label><br>
+                                        <input type="checkbox" name="profession">
+                                        <label class="form-check-label" for="profession">Инженер по жизнеобеспечению</label><br>
+                                        <input type="checkbox" name="profession">
+                                        <label class="form-check-label" for="profession">Инженер по радиационной защите</label><br>
+                                        <input type="checkbox" name="profession">
+                                        <label class="form-check-label" for="profession">Врач</label><br>
+                                        <input type="checkbox" name="profession">
+                                        <label class="form-check-label" for="profession">Экзобиолог</label><br>
+                                    </div>
+                                    <div class="form-control">
+                                    <label for="form-check">Укажите пол</label>
+                                    <div class="form-control">
+                                      <input class="form-check-input" type="radio" name="sex" id="male" value="male" checked>
+                                      <label class="form-check-label" for="male">
+                                        Мужской
+                                      </label>
+                                    </div>
+                                    <div class="form-control">
+                                      <input class="form-check-input" type="radio" name="sex" id="female" value="female">
+                                      <label class="form-check-label" for="female">
+                                        Женский
+                                      </label>
+                                    </div>
+                                    <div cclass="form-control">
+                                    <label for="about">Почему Вы хотите принять участие в миссии?</label> </br>
+                                    <textarea name="about" rows="3"></textarea>
+                                    </div>
+                                    <div class="form-control">
+                                    <label for="photo">Приложите фотографию</label>
+                                    <input type="file" class="form-control-file" id="photo" name="file">
+                                    </div>
+                                    <div class="form-control">
+                                      <input type="radio" name="fin_question">
+                                      <label for="fin_question">
+                                        Готовы остаться на Марсе?
+                                      </label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Отправить</button>
+                                </form>
+                            </div>
+                          </body>        
+"""
     elif request.method == 'POST':
-        print('Hello')
-        print(request.form)
+        print(request.form.values())
+        return render_template('auto_answer.html', keys=list(request.form.values()), form = list(request.form.values()))
+
 
 
 @app.route('/choice/<planet_name>')
@@ -330,32 +389,10 @@ def carousel_planet():
     '''
 
 
-@app.route('/choose_astro')
-def get_picture():
-    return f'''
-        <head>
-            <title>Отбор астронавтов</title>
-        </head>
-        <body>
-            <h1>Загрузка фотографии</h1>
-            <h2>для участия в миссии </h2>
-            <div>
-                <form>
-                    <label for="photo">Приложите фотографию</label>
-                    <input type="file" class="form-control-file" id="photo" name="file">
-                </form>
-            </div>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-        < img src='' id=preview>
-        <script>
-        скрипт по поиску формы и сохранении
-        </<script>
-        </body>'''
+# @app.route('/choose_astro')
+# def get_picture():
+#     return
 
-
-if __name__ == '__main__':
-    app.run(port=8080, host='127.0.0.1')
 
 if __name__ == '__main__':
     app.run(port=8080, host='127.0.0.1')
