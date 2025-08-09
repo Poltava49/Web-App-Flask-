@@ -187,7 +187,7 @@ def promoted_image():
 </body>''')
 
 
-#Шаблон формы и автоматический ответ
+#Шаблон формы и автоматический ответ на анкету
 
 @app.route('/form', methods=["GET", "POST"])
 def astronaut_survey():
