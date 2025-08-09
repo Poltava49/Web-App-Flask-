@@ -44,3 +44,13 @@ img {
     justify-content: space-between;
     align-items: center;
 }
+
+.mars_embl {
+    width: 40px;
+    height: 40px;
+}
+
+.img_inline_h2 {
+    display: flex;
+    align-items: center;
+}

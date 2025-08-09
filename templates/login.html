@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="img_inline_h2">
+        <img src="{{ url_for('static', filename='img/mars_embl.png') }}" alt="Марс" class="mars_embl">
+        <h2>Аварийный доступ</h2>
+    </div>
+
+    <form action="" method="post" novalidate>
+            {{ form.csrf_token }}
+            <div class="form-group">
+                {{ form.astro_id.label }}
+                {{ form.astro_id(class="form-control") }}
+                {% for error in form.astro_id.errors %}
+                <small class="text-danger">{{ error }}</small>
+            {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.password_astro.label }}
+                {{ form.password_astro(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.cap_id.label }}
+                {{ form.cap_id(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.cap_pass.label }}
+                {{ form.cap_pass(class="form-control") }}
+            </div>
+        <button type="submit" class="btn btn-primary">Отправить</button>
+    </form>
+{% endblock %}

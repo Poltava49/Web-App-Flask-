@@ -8,6 +8,8 @@ from wtforms.widgets import ListWidget, CheckboxInput
 
 app = Flask(__name__)
 
+app.config['SECRET_KEY'] = '123'
+
 
 # class MultiCheckboxField(SelectMultipleField):
 #     widget = ListWidget(prefix_label=False)
@@ -50,20 +52,20 @@ app = Flask(__name__)
 
 
 
-# class AccessForm(FlaskForm):
-#     username = StringField('id астронавта', validators=[DataRequired()])
-#     password = PasswordField('Пароль астронавта', validators=[DataRequired()])
-#     remember_me = BooleanField('id капитана')
-#     submit = SubmitField('Пароль капитана')
+class AccessForm(FlaskForm):
+    astro_id = StringField('id астронавта', validators=[DataRequired()])
+    password_astro = PasswordField('Пароль астронавта', validators=[DataRequired()])
+    cap_id =StringField('id капитана', validators=[DataRequired()])
+    cap_pass = PasswordField('Пароль капитана', validators=[DataRequired()])
 
 
 #Двойная защита
 @app.route('/access', methods=['GET', 'POST'])
 def access():
-    form_access = AccessForm()
-    if form_access.validate_on_submit():
-        return redirect('/success')
-    return render_template('login.html', title='Авторизация', form=form_access)
+    form = AccessForm()
+    if form.validate_on_submit():
+        pass
+    return render_template('login.html', title='Авторизация', form=form)
 
 
 @app.route('/<title>')
@@ -278,6 +280,10 @@ def astronaut_survey():
         print(request.form.values())
         return render_template('auto_answer.html', keys=list(request.form.values()), form = list(request.form.values()))
 
+
+
+
+#
 
 
 @app.route('/choice/<planet_name>')
