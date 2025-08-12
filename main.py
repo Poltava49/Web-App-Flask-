@@ -92,17 +92,10 @@ def list_prof(type):
         return render_template('list_prof.html', tag=type)
 
 
-
-# @app.route('/form', methods=["GET", "POST"])
-# def login():
-#     if request.method == 'GET':
-#         form_login = LoginForm()
-#         form_order = MultiCheckboxField()
-#         form_inter = InterestsForm()
-#         form_list = MultiCheckboxField()
-#         sex_form = GenderForm()
-#         return redirect('/success')
-#         # return render_template('login.html', title='Авторизация', form=form)
+@app.route('/distribution')
+def choose_cabin():
+    cabin = ['Denis', 'Dima', 'Sergey']
+    return render_template('distribution.html', list_cabin=cabin)
 
 
 

@@ -54,3 +54,8 @@ img {
     display: flex;
     align-items: center;
 }
+
+.title_distr {
+    margin-left: 22%;
+    margin-bottom: 1%;
+}

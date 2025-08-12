@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h3 class="title_distr">Размещение по каютам</h3>
+
+    {% for astro in list_cabin %}
+            {% if loop.first %}
+                <div class="lists">{{ astro }} - Каюта №1{{ loop.index.first }} - капитан .</div> </br>
+
+            {%else %}
+                <div class="lists"> {{ astro }} - Каюта №{{ loop.index }}</div></br>
+            {% endif %}
+
+    {% endfor %}
+
+{% endblock %}
