@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <style>
+        .color-cabin {
+            background-color:{{ color }};
+        }
+        table {
+            border-collapse: collapse;
+            width: 30%;
+            max-width: 500px;
+            border: 1px solid #000;
+        }
+        th, td {
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+    </style>
+
+    <h3 class="decor_title">Оформление каюты</h3>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Цвет стен</th>
+                <th>Эмблема</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="color-cabin"></td>
+                <td><img src="{{ img_url }}" alt="Эмблема" class="type_embl"></td>
+            </tr>
+        </tbody>
+    </table>
+
+
+
+
+{% endblock %}

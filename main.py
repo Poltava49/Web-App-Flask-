@@ -89,13 +89,30 @@ def prof_img(prof):
 def list_prof(type):
     tags = ['ul', 'ol']
     if type in tags:
-        return render_template('list_prof.html', tag=type)
+        return render_template('list_prof.html',
+                               tag=type)
 
 
 @app.route('/distribution')
 def choose_cabin():
     cabin = ['Denis', 'Dima', 'Sergey']
-    return render_template('distribution.html', list_cabin=cabin)
+    return render_template('distribution.html',
+                           list_cabin=cabin)
+
+
+@app.route('/table/<sex>/<int:age>')
+def cabin_decoration(sex, age):
+    color = 'blue' if sex.lower() == 'male' else 'pink'
+    img_file = 'kids.png' if age < 21 else 'adult.png'
+    img_url = url_for('static', filename=f'img/{img_file}')
+
+    return render_template(
+        'cabin_decoration.html',
+        color=color,
+        img_url=img_url
+    )
+
+
 
 
 
