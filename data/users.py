@@ -27,5 +27,6 @@ class User(SqlAlchemyBase):
                                         nullable=True)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
+    jobs = orm.relationship("Jobs", back_populates='user')
 
 
