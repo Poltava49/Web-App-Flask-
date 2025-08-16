@@ -4,59 +4,38 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField, Selec
 from wtforms.fields.simple import EmailField
 from wtforms.validators import DataRequired
 from wtforms.widgets import ListWidget, CheckboxInput
+from dotenv import load_dotenv
+import os
+from data import db_session
+from data.users import User
 
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = '123'
+load_dotenv()
 
 
-# class MultiCheckboxField(SelectMultipleField):
-#     widget = ListWidget(prefix_label=False)
-#     option_widget = CheckboxInput()
-#
-#
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+
+
 # class LoginForm(FlaskForm):
 #     name = StringField('Имя', validators=[DataRequired()])
 #     name = StringField('Фамилия', validators=[DataRequired()])
 #     password = EmailField("Email: ", validators=[DataRequired()])
 #     remember_me = BooleanField('Запомнить меня')
 #     submit = SubmitField('Войти')
-#
-#
-# class OrderForm(FlaskForm):
-#     graduation = SelectField('Образование', choices=[
-#         ('first', 'Среднее общеобразовательное'),
-#         ('first_prof', 'Среднее профессиональное'),
-#         ('high_first', 'Высшее неполное'),
-#         ('high_second', 'Высшее полное')
-#     ])
-#
-# class InterestsForm(FlaskForm):
-#     interests = MultiCheckboxField('Ваши интересы', choices=[
-#         ('engineer', 'Инженер-исследователь'),
-#         ('build', 'Инженер-строитель'),
-#         ('pilot', 'Пилот'),
-#         ('meteo', 'Метеоролог'),
-#         ('life', 'Инженер по жизнеобеспечению'),
-#         ('radio', 'Инженер по радиационной защите'),
-#         ('doctor', 'Врач'),
-#         ('biologist', 'Экзобиолог')
-#     ])
-
-
-# class GenderForm(FlaskForm):
-#     gender = RadioField('Ваш пол',
-#                       choices=[('male', 'Мужской'), ('female', 'Женский')],
-#                       validators=[DataRequired(message="Выберите пол")])
 
 
 
-class AccessForm(FlaskForm):
-    astro_id = StringField('id астронавта', validators=[DataRequired()])
-    password_astro = PasswordField('Пароль астронавта', validators=[DataRequired()])
-    cap_id =StringField('id капитана', validators=[DataRequired()])
-    cap_pass = PasswordField('Пароль капитана', validators=[DataRequired()])
+# class AccessForm(FlaskForm):
+#     astro_id = StringField('id астронавта', validators=[DataRequired()])
+#     password_astro = PasswordField('Пароль астронавта', validators=[DataRequired()])
+#     cap_id =StringField('id капитана', validators=[DataRequired()])
+#     cap_pass = PasswordField('Пароль капитана', validators=[DataRequired()])
+
+
+def main():
+    db_session.global_init("mars_explorer.db")
 
 
 #Двойная защита
@@ -72,6 +51,7 @@ def access():
 @app.route('/index/<title>')
 def index(title):
     return render_template('base.html', title=title)
+
 
 
 @app.route('/training/<prof>')
@@ -411,4 +391,5 @@ def carousel_planet():
 
 
 if __name__ == '__main__':
+    main()
     app.run(port=8080, host='127.0.0.1')
