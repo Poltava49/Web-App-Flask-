@@ -35,7 +35,7 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 
 def main():
-    db_session.global_init("mars_explorer.db")
+    db_session.global_init("db/mars_explorer.db")
 
 
 #Двойная защита

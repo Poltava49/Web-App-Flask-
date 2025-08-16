@@ -5,8 +5,9 @@ from sqlalchemy import orm
 
 
 class Jobs(SqlAlchemyBase):
-    __tableName__ = 'jobs'
+    __tablename__ = 'jobs'
     id = sqlalchemy.Column(sqlalchemy.Integer,
+                           primary_key=True,
                            autoincrement=True)
     team_leader =sqlalchemy.Column(sqlalchemy.Integer,
                                 sqlalchemy.ForeignKey("users.id"))
