@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 import os
 from data import db_session
 from data.users import User
+from data.jobs import Jobs
+from data.db_session import global_init, create_session
 
 
 app = Flask(__name__)
@@ -16,6 +18,32 @@ load_dotenv()
 
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+
+
+commands = [{'surname': 'Scott', 'name': 'Ridley', 'age': 21,
+             'position': 'captain', 'speciality': 'research engineer', 'adress': 'module_1',
+             'email':'scott_chief@mars.org'},
+            {'surname': 'Malkovich', 'name': 'Tom', 'age': 45,
+             'position': 'major', 'speciality': 'pilot', 'adress': 'module_2',
+             'email':'tom_pilot@mars.org'},
+            {'surname': 'Cage', 'name': 'Nicolas', 'age': 40,
+             'position': 'major', 'speciality': 'actor', 'adress': 'module_3',
+             'email':'nicolas_actor@mars.org'},
+            {'surname': 'Hendricson', 'name': 'Richard', 'age': 25,
+             'position': 'assistant', 'speciality': 'programmist', 'adress': 'module_4',
+             'email':'richard_progt@mars.org'},
+            {'surname': 'Harlesson', 'name': 'Rudy', 'age': 31,
+             'position': 'ex-captain', 'speciality': 'junior research engineer', 'adress': 'module_1',
+             'email': 'harly_chief@mars.org'}
+            ]
+
+new_commands = [{'surname': 'Kapoor', 'name': 'Venkat', 'age': 13,
+             'position': 'middle', 'speciality': 'ML engineer', 'adress': 'module_2',
+             'email':'vankat_ml@mars.org'},
+            {'surname': 'Povarenok', 'name': 'Povar', 'age': 17,
+             'position': 'chief', 'speciality': 'cooker', 'adress': 'module_3',
+             'email': 'cooker_ml@mars.org'}
+                ]
 
 
 # class LoginForm(FlaskForm):
@@ -27,15 +55,107 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 
 
-# class AccessForm(FlaskForm):
-#     astro_id = StringField('id астронавта', validators=[DataRequired()])
-#     password_astro = PasswordField('Пароль астронавта', validators=[DataRequired()])
-#     cap_id =StringField('id капитана', validators=[DataRequired()])
-#     cap_pass = PasswordField('Пароль капитана', validators=[DataRequired()])
+class AccessForm(FlaskForm):
+    astro_id = StringField('id астронавта', validators=[DataRequired()])
+    password_astro = PasswordField('Пароль астронавта', validators=[DataRequired()])
+    cap_id =StringField('id капитана', validators=[DataRequired()])
+    cap_pass = PasswordField('Пароль капитана', validators=[DataRequired()])
+
+
+
+
+def add_astro_pilot(commands):
+    for i in range(len(commands)):
+        user = User()
+        user.surname = commands[i]['surname']
+        user.name = commands[i]['name']
+        user.age = commands[i]['age']
+        user.position = commands[i]['position']
+        user.speciality = commands[i]['speciality']
+        user.adress = commands[i]['adress']
+        user.email = commands[i]['email']
+        db_sess = db_session.create_session()
+        db_sess.add(user)
+        db_sess.commit()
+
+all_jobs = [{'team_leader': 7, 'jobs': 'Clean kitchen', 'work_size': 2,
+             'collaborators': '3', 'is_finished': True},
+            {'team_leader': 6, 'jobs': 'Created regression model for prognosis weather', 'work_size': 4,
+             'collaborators': '1, 3', 'is_finished': False}]
+    # ,
+    #         {'team_leader': 1, 'jobs': 'deployment of residential modules 1 and 2', 'work_size': 15,
+    #                      'collaborators': '2,3', 'is_finished': False}
+
+
+def add_jobs(all_jobs):
+
+    for i in range(len(all_jobs)):
+        job = Jobs()
+        job.team_leader = all_jobs[i]['team_leader']
+        job.jobs = all_jobs[i]['jobs']
+        job.work_size = all_jobs[i]['work_size']
+        job.collaborators = all_jobs[i]['collaborators']
+        job.is_finished = all_jobs[i]['is_finished']
+        db_sess = db_session.create_session()
+        db_sess.add(job)
+        db_sess.commit()
+
+
+def all_prompt():
+    print('Для завершения пропиши команду End')
+    db_name = input('Введите название базы данных ')
+    while db_name != 'End':
+        try:
+            global_init(f'db/{db_name}.db')
+            db_sess = create_session()
+            results = ''
+            task = input('Какой запрос вывести? Пример: Запрос 1 ')
+            if task =='Запрос 1':
+                results = db_sess.query(User)
+            elif task =='Запрос 2':
+                results= db_sess.query(User).filter(User.adress == 'module_1')
+            elif task =='Запрос 3':
+                results= db_sess.query(User).filter(User.age < 18)
+            elif task =='Запрос 4':
+                results= db_sess.query(User).filter((User.position == 'chief') |(User.position == 'middle'))
+
+            elif task =='Запрос 5':
+                results= db_sess.query(Jobs).filter((Jobs.work_size < 20) & (Jobs.is_finished == 0))
+            elif task =='Запрос 6':
+                all_commands = db_sess.query(Jobs).filter(Jobs.collaborators).all()
+                list_el = [(el.collaborators, el.user.surname, el.user.name) for el in all_commands]
+                max_value = max(list_el, key=lambda item:len(item[0]))
+                max_values_in_list = [x for x in list_el if len(x[0].split(',')) == len(max_value[0].split(','))]
+                results =[' '.join([surname, name]) for string, surname, name in set(max_values_in_list)]
+
+            elif task =='Запрос 7':
+                results= db_sess.query(User).filter((User.adress == 'module_1') & (User.age < 21))
+                for colonist in results:
+                    colonist.adress = 'module_3'
+                    db_sess.commit()
+
+
+            if results:
+                for result in results:
+                    print(result)
+            else:
+                raise Exception
+
+
+        except Exception as e:
+            print(f"\nОшибка: {e}\nПроверьте:")
+            print("1. Что файл базы существует и доступен")
+            print("2. Что в базе есть таблица 'users'")
+            print("3. Что таблица содержит столбец 'adress'")
+            print("4. Что такой запрос реализован в логике кода")
+
 
 
 def main():
     db_session.global_init("db/mars_explorer.db")
+    # add_astro_pilot(new_commands)
+    # add_jobs(all_jobs)
+    all_prompt()
 
 
 #Двойная защита
@@ -104,9 +224,7 @@ def astronaut_survey():
         return redirect('/answer')
 
 
-@app.route('/answer')
-def answer(forms):
-    return render_template('auto_answer.html', forms = forms)
+
 
 
 @app.route('/')
@@ -181,7 +299,7 @@ def promoted_image():
 
 #Шаблон формы и автоматический ответ на анкету
 
-@app.route('/form', methods=["GET", "POST"])
+@app.route('/answer', methods=["GET", "POST"])
 def astronaut_survey():
     if request.method == 'GET':
         return f"""<!doctype html>
@@ -215,11 +333,11 @@ def astronaut_survey():
                                       <option>Высшее полное</option>
                                     </select>
                                     <label for="form-group form-check">Какие у Вас есть профессии?</label>
-                                    <div name = prof_list class="form-control" form-check">
-                                        <input type="checkbox" name="profession"> 
-                                        <label class="form-check-label" name=""profession"  value="Инженер-исследователь">Инженер-исследователь</label><br>
-                                        <input type="checkbox" name="profession value="designer">
-                                        <label class="form-check-label" for="profession">Инженер-строитель</label><br>
+                                    <div name = "prof_list" class="form-control form-check">
+                                         
+                                        <label class="form-check-label" ><input type="checkbox" name="profession" value="engineer" >Инженер-исследователь </label><br>
+                                       
+                                        <label class="form-check-label" name="profession" value="sub-engineer"> <input type="checkbox" name="profession" value="sub-engineer">Инженер-строитель</label><br>
                                         <input type="checkbox" name="profession">
                                         <label class="form-check-label" for="profession">Пилот</label><br>
                                         <input type="checkbox" name="profession">
@@ -267,13 +385,9 @@ def astronaut_survey():
                           </body>        
 """
     elif request.method == 'POST':
+        print(request.form)
         print(request.form.values())
         return render_template('auto_answer.html', keys=list(request.form.values()), form = list(request.form.values()))
-
-
-
-
-#
 
 
 @app.route('/choice/<planet_name>')
