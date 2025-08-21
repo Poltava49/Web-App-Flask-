@@ -150,12 +150,34 @@ def all_prompt():
             print("4. Что такой запрос реализован в логике кода")
 
 
+@app.route('/works_book')
+def works_book():
+    dict_works = dict()
+    final_books = []
+    db_sess = create_session()
+    results = db_sess.query(Jobs).all()
+    for result in results:
+        dict_works['id'] = result.id
+        dict_works['team_leader'] = result.team_leader
+        dict_works['jobs'] = result.jobs
+        dict_works['work_size'] = result.work_size
+        dict_works['collaborators'] = result.collaborators
+        dict_works['start_date'] = result.start_date
+        dict_works['end_date'] = result.end_date
+        dict_works['is_finished'] = result.is_finished
+        final_books.append(dict_works)
+        dict_works = {}
+
+    return render_template('table_works_book.html', results=final_books)
+
+
 
 def main():
     db_session.global_init("db/mars_explorer.db")
     # add_astro_pilot(new_commands)
     # add_jobs(all_jobs)
-    all_prompt()
+    # all_prompt()
+    # works_book()
 
 
 #Двойная защита

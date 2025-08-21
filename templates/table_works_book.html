@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!--<head>-->
+<!--    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">-->
+<!--</head>-->
+
+<h1>Works log</h1>
+
+{% for result in results %}
+    <h4>Action #{{result['id']}}</h4>
+         <table class=".table">
+            <thead class=".table thead th">
+                <tr>
+                    {% for key in result.keys() %}
+                        {% if key!= 'id' %}
+                            <th class=".table thead th">{{ key }}</th>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for key, value in result.items() %}
+                        {% if key!= 'id' %}
+                            <td class=".table tbody td">{{ value }}</td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+{% endfor %}
+{% endblock %}
+
+
