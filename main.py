@@ -164,9 +164,11 @@ def works_book():
         dict_works['collaborators'] = result.collaborators
         dict_works['start_date'] = result.start_date
         dict_works['end_date'] = result.end_date
+        # dict_works['duration'] = result.end_date - result.start_date
         dict_works['is_finished'] = result.is_finished
         final_books.append(dict_works)
         dict_works = {}
+
 
     return render_template('table_works_book.html', results=final_books)
 
