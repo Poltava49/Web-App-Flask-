@@ -25,4 +25,13 @@ td {
 	padding: 10px 15px;
 	font-size: 14px;
 	vertical-align: top;
+	background-color: lightblue;
+}
+
+.td-fin-status {
+    background-color: green;
+}
+
+.td-not-fin-status {
+    background-color: pink;
 }
