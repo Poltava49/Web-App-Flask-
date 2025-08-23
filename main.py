@@ -46,12 +46,17 @@ new_commands = [{'surname': 'Kapoor', 'name': 'Venkat', 'age': 13,
                 ]
 
 
-# class LoginForm(FlaskForm):
-#     name = StringField('Имя', validators=[DataRequired()])
-#     name = StringField('Фамилия', validators=[DataRequired()])
-#     password = EmailField("Email: ", validators=[DataRequired()])
-#     remember_me = BooleanField('Запомнить меня')
-#     submit = SubmitField('Войти')
+class LoginForm(FlaskForm):
+    login = StringField('login/email', validators=[DataRequired()])
+    password = PasswordField("Password: ", validators=[DataRequired()])
+    repeat_password = PasswordField("Repeat password", validators=[DataRequired()])
+    surname = StringField('Surname', validators=[DataRequired()])
+    name = StringField('Name', validators=[DataRequired()])
+    age = StringField('Age', validators=[DataRequired()])
+    position = StringField('Position', validators=[DataRequired()])
+    speciality = StringField('Speciality', validators=[DataRequired()])
+    adress = StringField('Adress', validators=[DataRequired()])
+    submit = SubmitField('Войти')
 
 
 
@@ -82,9 +87,6 @@ all_jobs = [{'team_leader': 7, 'jobs': 'Clean kitchen', 'work_size': 2,
              'collaborators': '3', 'is_finished': True},
             {'team_leader': 6, 'jobs': 'Created regression model for prognosis weather', 'work_size': 4,
              'collaborators': '1, 3', 'is_finished': False}]
-    # ,
-    #         {'team_leader': 1, 'jobs': 'deployment of residential modules 1 and 2', 'work_size': 15,
-    #                      'collaborators': '2,3', 'is_finished': False}
 
 
 def add_jobs(all_jobs):
@@ -168,10 +170,18 @@ def works_book():
         dict_works['is_finished'] = result.is_finished
         final_books.append(dict_works)
         dict_works = {}
-
-
     return render_template('table_works_book.html', results=final_books)
 
+
+@app.route('/register',methods=['GET', 'POST'])
+def register_form():
+    form=LoginForm()
+    print(form.password)
+    if request.method == 'GET':
+        return render_template('register.html', title='Регистрация', form=form)
+    elif request.method == 'POST':
+        print('tut')
+        return render_template('success.html', title='Успешная регистрация')
 
 
 def main():
