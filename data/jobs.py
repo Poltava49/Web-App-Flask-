@@ -23,4 +23,4 @@ class Jobs(SqlAlchemyBase):
 
 
     def __repr__(self):
-        return f'<Job> {self.jobs}'
+        return f'<Job> {self.jobs} {self.team_leader} {self.work_size} {self.is_finished}'

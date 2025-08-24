@@ -1,5 +1,7 @@
+import login
 from flask import Flask, render_template, url_for, request, redirect
 from flask_wtf import FlaskForm
+# import FlaskLogin
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, SelectMultipleField, RadioField
 from wtforms.fields.simple import EmailField
 from wtforms.validators import DataRequired
@@ -38,6 +40,7 @@ commands = [{'surname': 'Scott', 'name': 'Ridley', 'age': 21,
              'email': 'harly_chief@mars.org'}
             ]
 
+
 new_commands = [{'surname': 'Kapoor', 'name': 'Venkat', 'age': 13,
              'position': 'middle', 'speciality': 'ML engineer', 'adress': 'module_2',
              'email':'vankat_ml@mars.org'},
@@ -45,6 +48,18 @@ new_commands = [{'surname': 'Kapoor', 'name': 'Venkat', 'age': 13,
              'position': 'chief', 'speciality': 'cooker', 'adress': 'module_3',
              'email': 'cooker_ml@mars.org'}
                 ]
+
+
+all_jobs = [{'team_leader': 7, 'jobs': 'Clean kitchen', 'work_size': 2,
+             'collaborators': '3', 'is_finished': True},
+            {'team_leader': 6, 'jobs': 'Created regression model for prognosis weather', 'work_size': 4,
+             'collaborators': '1, 3', 'is_finished': False}]
+
+
+new_departments = [{'title': 'geologic search', 'chief': 1, 'email': 'geologic_department@gmail.com'},
+                   {'title': 'engineering division', 'chief': 2, 'email': 'engineering_department@gmail.com'},
+                   {'title': 'kitchen division', 'chief': 3, 'email': 'kitchen_department@gmail.com'}
+                   ]
 
 
 class LoginForm(FlaskForm):
@@ -68,6 +83,15 @@ class AccessForm(FlaskForm):
     cap_pass = PasswordField('Пароль капитана', validators=[DataRequired()])
 
 
+def add_department(new_departments):
+    for i in range(len(new_departments)):
+        department = Department()
+        department.title = new_departments[i]['title']
+        department.chief = new_departments[i]['chief']
+        department.email = new_departments[i]['email']
+        db_sess = db_session.create_session()
+        db_sess.add(department)
+        db_sess.commit()
 
 
 def add_astro_pilot(commands):
@@ -84,14 +108,8 @@ def add_astro_pilot(commands):
         db_sess.add(user)
         db_sess.commit()
 
-all_jobs = [{'team_leader': 7, 'jobs': 'Clean kitchen', 'work_size': 2,
-             'collaborators': '3', 'is_finished': True},
-            {'team_leader': 6, 'jobs': 'Created regression model for prognosis weather', 'work_size': 4,
-             'collaborators': '1, 3', 'is_finished': False}]
-
 
 def add_jobs(all_jobs):
-
     for i in range(len(all_jobs)):
         job = Jobs()
         job.team_leader = all_jobs[i]['team_leader']
@@ -104,9 +122,22 @@ def add_jobs(all_jobs):
         db_sess.commit()
 
 
+# def user_autorization():
+
+
+
+
 def all_prompt():
     print('Для завершения пропиши команду End')
     db_name = input('Введите название базы данных ')
+    try:
+        global_init(f'db/{db_name}.db')
+        db_sess = create_session()
+    except Exception as e:
+        print(f"\nОшибка: {e}\nПроверьте:")
+        print(" Что файл базы существует и доступен")
+        print(" Что существующая база имеет такое название")
+
     while db_name != 'End':
         try:
             global_init(f'db/{db_name}.db')
@@ -121,35 +152,38 @@ def all_prompt():
                 results= db_sess.query(User).filter(User.age < 18)
             elif task =='Запрос 4':
                 results= db_sess.query(User).filter((User.position == 'chief') |(User.position == 'middle'))
-
             elif task =='Запрос 5':
                 results= db_sess.query(Jobs).filter((Jobs.work_size < 20) & (Jobs.is_finished == 0))
+                map(result.__repr__(), results)
             elif task =='Запрос 6':
                 all_commands = db_sess.query(Jobs).filter(Jobs.collaborators).all()
                 list_el = [(el.collaborators, el.user.surname, el.user.name) for el in all_commands]
                 max_value = max(list_el, key=lambda item:len(item[0]))
                 max_values_in_list = [x for x in list_el if len(x[0].split(',')) == len(max_value[0].split(','))]
                 results =[' '.join([surname, name]) for string, surname, name in set(max_values_in_list)]
-
             elif task =='Запрос 7':
-                results= db_sess.query(User).filter((User.adress == 'module_1') & (User.age < 21))
+                results= db_sess.query(User).filter((User.adress == 'module_3') & (User.age < 21))
                 for colonist in results:
-                    colonist.adress = 'module_3'
+                    colonist.adress = 'module_1'
                     db_sess.commit()
+            elif task == 'Запрос 8':
+                results = (db_sess.query(Jobs).join(User, User.id == Jobs.team_leader)
+                           .join(Department, User.id == Department.chief)
+                           .filter((Department.id==1) & (Jobs.is_finished == 1))
+                           .all())
+                for el in results:
+                    print(el.user.name, el.user.surname)
 
-
-            if results:
-                for result in results:
-                    print(result)
+            for result in results:
+                print(result)
             else:
                 raise Exception
 
 
         except Exception as e:
             print(f"\nОшибка: {e}\nПроверьте:")
-            print("1. Что файл базы существует и доступен")
-            print("2. Что в базе есть таблица 'users'")
-            print("3. Что таблица содержит столбец 'adress'")
+            print("1. Что в базе есть нужная таблица")
+            print("2. Что таблица содержит нужный столбец")
             print("4. Что такой запрос реализован в логике кода")
 
 
@@ -177,11 +211,9 @@ def works_book():
 @app.route('/register',methods=['GET', 'POST'])
 def register_form():
     form=LoginForm()
-    print(form.password)
     if request.method == 'GET':
         return render_template('register.html', title='Регистрация', form=form)
     elif request.method == 'POST':
-        print('tut')
         return render_template('success.html', title='Успешная регистрация')
 
 
@@ -189,8 +221,9 @@ def main():
     db_session.global_init("db/mars_explorer.db")
     # add_astro_pilot(new_commands)
     # add_jobs(all_jobs)
-    # all_prompt()
+    all_prompt()
     # works_book()
+    # add_department(new_departments)
 
 
 #Двойная защита
@@ -248,9 +281,6 @@ def cabin_decoration(sex, age):
     )
 
 
-
-
-
 def astronaut_survey():
     if request.method == 'GET':
         return
@@ -259,17 +289,9 @@ def astronaut_survey():
         return redirect('/answer')
 
 
-
-
-
 @app.route('/')
 def title():
     return f"<title>Миссия Колонизация Марса</title>"
-
-#
-# @app.route('/index')
-# def index():
-#     return f"<title>Миссия Колонизация Марса</title><h1>И на Марсе будут яблони цвести!</h1>"
 
 
 @app.route('/promotion')
@@ -333,7 +355,6 @@ def promoted_image():
 
 
 #Шаблон формы и автоматический ответ на анкету
-
 @app.route('/answer', methods=["GET", "POST"])
 def astronaut_survey():
     if request.method == 'GET':
