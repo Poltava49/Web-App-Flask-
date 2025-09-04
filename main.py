@@ -1,8 +1,8 @@
 import login
 from flask import Flask, render_template, url_for, request, redirect
 from flask_wtf import FlaskForm
-# import FlaskLogin
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, SelectMultipleField, RadioField
+from flask_login import LoginManager, UserMixin, login_user
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, SelectMultipleField, RadioField, IntegerField
 from wtforms.fields.simple import EmailField
 from wtforms.validators import DataRequired
 from wtforms.widgets import ListWidget, CheckboxInput
@@ -18,6 +18,9 @@ from data.db_session import global_init, create_session
 app = Flask(__name__)
 
 load_dotenv()
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -75,12 +78,27 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Войти')
 
 
+class ReLoginForm(FlaskForm):
+    email = StringField('login/email', validators=[DataRequired()])
+    password = PasswordField("Password: ", validators=[DataRequired()])
+    submit = SubmitField('Войти')
+
 
 class AccessForm(FlaskForm):
     astro_id = StringField('id астронавта', validators=[DataRequired()])
     password_astro = PasswordField('Пароль астронавта', validators=[DataRequired()])
     cap_id =StringField('id капитана', validators=[DataRequired()])
     cap_pass = PasswordField('Пароль капитана', validators=[DataRequired()])
+
+
+class WorksForm(FlaskForm):
+    team_leader = IntegerField('Руководитель', validators=[DataRequired()])
+    jobs = StringField('Описание работы', validators=[DataRequired()])
+    work_size = IntegerField('Объем работ в часах', validators=[DataRequired()])
+    collaborators = StringField('Помощники', validators=[DataRequired()])
+    end_date = StringField('Дата завершения работы', validators=[DataRequired()])
+    is_finished = BooleanField('Статус работы', validators=[DataRequired()])
+    submit = SubmitField('Submit')
 
 
 def add_department(new_departments):
@@ -120,11 +138,6 @@ def add_jobs(all_jobs):
         db_sess = db_session.create_session()
         db_sess.add(job)
         db_sess.commit()
-
-
-# def user_autorization():
-
-
 
 
 def all_prompt():
@@ -217,11 +230,42 @@ def register_form():
         return render_template('success.html', title='Успешная регистрация')
 
 
+@login_manager.user_loader
+def load_user(user_id):
+    db_sess = db_session.create_session()
+    return db_sess.query(User).get(user_id)
+
+
+@app.route('/work_form', methods=['GET', 'POST'])
+def add_work_form():
+    form = WorksForm()
+    if form.validate_on_submit():
+        pass
+
+    return render_template('work_form.html', title='Adding a job', form=form)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = ReLoginForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.email == form.email.data).first()
+        if user and user.hashed_password == form.password.data:
+            login_user(user, remember=True)
+            return redirect('/works_book')
+            # return render_template("success_enter.html", user_name=user.name)
+        return render_template('login.html',
+                               message="Неправильный логин или пароль",
+                               form=form)
+    return render_template('login.html', title='Авторизация', form=form)
+
+
 def main():
     db_session.global_init("db/mars_explorer.db")
     # add_astro_pilot(new_commands)
     # add_jobs(all_jobs)
-    all_prompt()
+    # all_prompt()
     # works_book()
     # add_department(new_departments)
 

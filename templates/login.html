@@ -1,32 +1,28 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="img_inline_h2">
-        <img src="{{ url_for('static', filename='img/mars_embl.png') }}" alt="Марс" class="mars_embl">
-        <h2>Аварийный доступ</h2>
-    </div>
-
-    <form action="" method="post" novalidate>
-            {{ form.csrf_token }}
-            <div class="form-group">
-                {{ form.astro_id.label }}
-                {{ form.astro_id(class="form-control") }}
-                {% for error in form.astro_id.errors %}
-                <small class="text-danger">{{ error }}</small>
+    <h1>Авторизация</h1>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.email.label }}<br>
+            {{ form.email(class="form-control", type="email") }}<br>
+            {% for error in form.email.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
             {% endfor %}
-            </div>
-            <div class="form-group">
-                {{ form.password_astro.label }}
-                {{ form.password_astro(class="form-control") }}
-            </div>
-            <div class="form-group">
-                {{ form.cap_id.label }}
-                {{ form.cap_id(class="form-control") }}
-            </div>
-            <div class="form-group">
-                {{ form.cap_pass.label }}
-                {{ form.cap_pass(class="form-control") }}
-            </div>
-        <button type="submit" class="btn btn-primary">Отправить</button>
+        </p>
+        <p>
+            {{ form.password.label }}<br>
+            {{ form.password(class="form-control", type="password") }}<br>
+            {% for error in form.password.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+        <div>{{ message }}</div>
     </form>
 {% endblock %}
