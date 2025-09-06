@@ -13,6 +13,7 @@ from data.users import User
 from data.jobs import Jobs
 from data.department import Department
 from data.db_session import global_init, create_session
+from flask_login import login_user, current_user, login_required, logout_user
 
 
 app = Flask(__name__)
@@ -65,8 +66,8 @@ new_departments = [{'title': 'geologic search', 'chief': 1, 'email': 'geologic_d
                    ]
 
 
-class LoginForm(FlaskForm):
-    login = StringField('login/email', validators=[DataRequired()])
+class RegisterForm(FlaskForm):
+    email = StringField('email', validators=[DataRequired()])
     password = PasswordField("Password: ", validators=[DataRequired()])
     repeat_password = PasswordField("Repeat password", validators=[DataRequired()])
     surname = StringField('Surname', validators=[DataRequired()])
@@ -81,6 +82,7 @@ class LoginForm(FlaskForm):
 class ReLoginForm(FlaskForm):
     email = StringField('login/email', validators=[DataRequired()])
     password = PasswordField("Password: ", validators=[DataRequired()])
+    remember_me = BooleanField('Запомнить меня')
     submit = SubmitField('Войти')
 
 
@@ -96,8 +98,8 @@ class WorksForm(FlaskForm):
     jobs = StringField('Описание работы', validators=[DataRequired()])
     work_size = IntegerField('Объем работ в часах', validators=[DataRequired()])
     collaborators = StringField('Помощники', validators=[DataRequired()])
-    end_date = StringField('Дата завершения работы', validators=[DataRequired()])
-    is_finished = BooleanField('Статус работы', validators=[DataRequired()])
+    end_date = StringField('Дата завершения работы')
+    is_finished = BooleanField('Статус работы')
     submit = SubmitField('Submit')
 
 
@@ -218,16 +220,33 @@ def works_book():
         dict_works['is_finished'] = result.is_finished
         final_books.append(dict_works)
         dict_works = {}
-    return render_template('table_works_book.html', results=final_books)
+    return render_template('table_works_book.html', results=final_books, user=current_user)
+
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    return redirect('/login')
 
 
 @app.route('/register',methods=['GET', 'POST'])
 def register_form():
-    form=LoginForm()
-    if request.method == 'GET':
-        return render_template('register.html', title='Регистрация', form=form)
-    elif request.method == 'POST':
-        return render_template('success.html', title='Успешная регистрация')
+    form=RegisterForm()
+    if form.validate_on_submit():
+        user = User()
+        user.name =form.name.data
+        user.surname = form.surname.data
+        user.age = form.age.data
+        user.position = form.position.data
+        user.speciality = form.speciality.data
+        user.adress = form.adress.data
+        user.email = form.email.data
+        user.set_password(form.password.data)
+        db_sess = db_session.create_session()
+        db_sess.add(user)
+        db_sess.commit()
+        return redirect('/works_book')
+    return render_template('register.html', title='Регистрация', form=form)
 
 
 @login_manager.user_loader
@@ -239,10 +258,25 @@ def load_user(user_id):
 @app.route('/work_form', methods=['GET', 'POST'])
 def add_work_form():
     form = WorksForm()
-    if form.validate_on_submit():
-        pass
 
-    return render_template('work_form.html', title='Adding a job', form=form)
+    if form.validate_on_submit():
+        job = Jobs()
+        job.team_leader = form.team_leader.data
+        job.jobs = form.jobs.data
+        job.work_size = form.work_size.data
+        job.collaborators = form.collaborators.data
+        job.end = form.end_date.data
+        job.is_finished = form.is_finished.data
+        try:
+            db_sess = db_session.create_session()
+            db_sess.add(job)
+            db_sess.commit()
+            return redirect('/works_book')
+        except Exception as e:
+            print(f'Ошибка обработки формы работ - {e}')
+    elif request.method == 'POST':
+        print(f"Ошибки формы: {form.errors}")
+    return render_template('work_form.html', title='Adding a job', form=form, user=current_user)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -251,13 +285,17 @@ def login():
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.email == form.email.data).first()
-        if user and user.hashed_password == form.password.data:
-            login_user(user, remember=True)
+
+        if user and user.check_password(form.password.data):
+            login_user(user, remember=form.remember_me.data)
+
             return redirect('/works_book')
+        else:
+            print('Неверный email или пароль', 'danger')
             # return render_template("success_enter.html", user_name=user.name)
         return render_template('login.html',
                                message="Неправильный логин или пароль",
-                               form=form)
+                               form=form, user=current_user)
     return render_template('login.html', title='Авторизация', form=form)
 
 

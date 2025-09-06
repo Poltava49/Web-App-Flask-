@@ -1,23 +1,27 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Adding a job</h1>
-        {% for field in form if field.name != 'csrf_token' and field.name != 'submit' and field.name != 'is_finished' %}
-        <form сlass="form-group mb-3 col-md-20">
-            <div>
-                {{ field.label(class="form-check-label mb-3") }} </br>
-                {{ field(class="form-control form-control-lg w-100") }}
-                {% for error in field.errors %}
-                    <div class="alert alert-danger mb-3 col-md-20">{{ error }}</div>
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card p-4 shadow-sm" style="width: 100%;">
+        <h1>Adding a job</h1>
+            <form сlass="form-group mb-3 col-md-20"  method="POST">
+                {{ form.hidden_tag() }}
+                {% for field in form if field.name != 'csrf_token' and field.name != 'submit' and field.name != 'is_finished' %}
+                <div>
+                    {{ field.label(class="form-check-label mb-3") }} </br>
+                    {{ field(class="form-control form-control-lg w-100") }}
+                    {% for error in field.errors %}
+                        <div class="alert alert-danger mb-3 col-md-20">{{ error }}</div>
+                    {% endfor %}
+                </div >
                 {% endfor %}
-            </div >
-        {% endfor %}
-        <div class="form-group">
-            <p>Is finished? {{ form.is_finished (class="btn btn-primary") }}</p>
-        </div>
-        <div class="form-group">
-            {{ form.submit(class="btn btn-primary") }}
-        </div>
-    </form>
-
+                <div class="form-group">
+                    <p>Is finished? {{ form.is_finished (class="btn btn-primary") }}</p>
+                </div>
+                <div class="form-group">
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+</div>
+    </div>
 {% endblock %}
