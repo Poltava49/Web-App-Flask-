@@ -16,7 +16,7 @@
         <h1>Миссия Колонизация Марса</h1>
         <a class="navbar-brand"></a>
         {% if current_user.is_authenticated %}
-        <form action="{{ url_for('logout') }}" method="post"">
+        <form action="{{ url_for('logout') }}" method="post">
             <button type="submit" class="btn">{% block user_name %}{% endblock %}</button>
         </form>
         {% endif %}
@@ -31,3 +31,8 @@
     {% endblock %}
 </body>
 </html>
+
+
+
+
+

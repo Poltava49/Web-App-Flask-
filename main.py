@@ -2,7 +2,7 @@ import login
 from flask import Flask, render_template, url_for, request, redirect
 from flask_wtf import FlaskForm
 from flask_login import LoginManager, UserMixin, login_user
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, SelectMultipleField, RadioField, IntegerField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, SelectMultipleField, RadioField, IntegerField, DateTimeField
 from wtforms.fields.simple import EmailField
 from wtforms.validators import DataRequired
 from wtforms.widgets import ListWidget, CheckboxInput
@@ -98,7 +98,17 @@ class WorksForm(FlaskForm):
     jobs = StringField('Описание работы', validators=[DataRequired()])
     work_size = IntegerField('Объем работ в часах', validators=[DataRequired()])
     collaborators = StringField('Помощники', validators=[DataRequired()])
-    end_date = StringField('Дата завершения работы')
+    end_date = DateTimeField('Дата завершения работы')
+    is_finished = BooleanField('Статус работы')
+    submit = SubmitField('Submit')
+
+
+class EditWordForm(FlaskForm):
+    team_leader = IntegerField('Руководитель', validators=[DataRequired()])
+    jobs = StringField('Описание работы', validators=[DataRequired()])
+    work_size = IntegerField('Объем работ в часах', validators=[DataRequired()])
+    collaborators = StringField('Помощники', validators=[DataRequired()])
+    end_date = DateTimeField('Дата завершения работы')
     is_finished = BooleanField('Статус работы')
     submit = SubmitField('Submit')
 
@@ -188,7 +198,6 @@ def all_prompt():
                            .all())
                 for el in results:
                     print(el.user.name, el.user.surname)
-
             for result in results:
                 print(result)
             else:
@@ -204,23 +213,64 @@ def all_prompt():
 
 @app.route('/works_book')
 def works_book():
-    dict_works = dict()
-    final_books = []
     db_sess = create_session()
-    results = db_sess.query(Jobs).all()
-    for result in results:
-        dict_works['id'] = result.id
-        dict_works['team_leader'] = result.team_leader
-        dict_works['jobs'] = result.jobs
-        dict_works['work_size'] = result.work_size
-        dict_works['collaborators'] = result.collaborators
-        dict_works['start_date'] = result.start_date
-        dict_works['end_date'] = result.end_date
-        # dict_works['duration'] = result.end_date - result.start_date
-        dict_works['is_finished'] = result.is_finished
-        final_books.append(dict_works)
-        dict_works = {}
-    return render_template('table_works_book.html', results=final_books, user=current_user)
+    form = db_sess.query(Jobs).all()
+    return render_template('table_works_book.html', results=form, user=current_user)
+
+
+@app.route('/works_book/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_work(id):
+    form = WorksForm()
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+        jobs = db_sess.query(Jobs).filter(Jobs.id == id).first()
+        if jobs:  # Если работа найдена, заполняем форму данными
+            form.team_leader.data = jobs.team_leader
+            form.jobs.data = jobs.jobs
+            form.work_size.data = jobs.work_size
+            form.collaborators.data = jobs.collaborators
+            form.end_date.data = jobs.end_date
+            form.is_finished.data = jobs.is_finished
+        else:
+            abort(404)
+        # Если работа не найдена, форма останется пустой для создания новой
+
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        jobs = db_sess.query(Jobs).filter(Jobs.id == id).first()
+        if jobs:  # Если работа существует, обновляем её
+            jobs.team_leader = form.team_leader.data
+            jobs.jobs = form.jobs.data
+            jobs.work_size = form.work_size.data
+            jobs.collaborators = form.collaborators.data
+            jobs.end_date = form.end_date.data
+            jobs.is_finished = form.is_finished.data
+            db_sess.commit()
+            return redirect('/')
+        else:
+            abort(404)
+
+    return render_template('work_form.html',
+                           title='Редактирование работы',
+                           form=form, user=current_user)
+
+
+@app.route('/jobs_delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+def news_delete(id):
+    db_sess = db_session.create_session()
+    jobs = db_sess.query(Jobs).filter(Jobs.id == id
+                                      ).first()
+    if jobs:
+        db_sess.delete(jobs)
+        db_sess.commit()
+    else:
+        abort(404)
+    return redirect('/')
+
+
+
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -258,7 +308,6 @@ def load_user(user_id):
 @app.route('/work_form', methods=['GET', 'POST'])
 def add_work_form():
     form = WorksForm()
-
     if form.validate_on_submit():
         job = Jobs()
         job.team_leader = form.team_leader.data
