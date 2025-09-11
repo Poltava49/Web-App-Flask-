@@ -247,7 +247,7 @@ def edit_work(id):
             jobs.end_date = form.end_date.data
             jobs.is_finished = form.is_finished.data
             db_sess.commit()
-            return redirect('/')
+            return redirect('/works_book')
         else:
             abort(404)
 
@@ -267,7 +267,7 @@ def news_delete(id):
         db_sess.commit()
     else:
         abort(404)
-    return redirect('/')
+    return redirect('/works_book')
 
 
 
@@ -295,7 +295,7 @@ def register_form():
         db_sess = db_session.create_session()
         db_sess.add(user)
         db_sess.commit()
-        return redirect('/works_book')
+        return redirect('/login')
     return render_template('register.html', title='Регистрация', form=form)
 
 

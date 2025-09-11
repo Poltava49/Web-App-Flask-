@@ -10,7 +10,21 @@
 <div class="work-books">
     {% for job in results %}
         <h4>Action #{{ job.id }}</h4>
-            {% if current_user.is_authenticated and current_user.id == job.team_leader %}
+            <div>
+                <a href="/work_form" class="btn btn-warning">
+                    Добавить
+                </a>
+            </div>
+            {% if current_user.is_authenticated and current_user.position.lower() == 'captain' %}
+             <div>
+                <a href="/works_book/{{ job.id }}" class="btn btn-warning">
+                    Изменить
+                </a>
+                 <a href="/jobs_delete/{{ job.id }}" class="btn btn-danger">
+                     Удалить
+                 </a>
+            </div>
+            {% elif current_user.is_authenticated and current_user.id == job.team_leader %}
             <div>
                 <a href="/works_book/{{ job.id }}" class="btn btn-warning">
                     Изменить
