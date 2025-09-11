@@ -113,102 +113,109 @@ class EditWordForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-def add_department(new_departments):
-    for i in range(len(new_departments)):
-        department = Department()
-        department.title = new_departments[i]['title']
-        department.chief = new_departments[i]['chief']
-        department.email = new_departments[i]['email']
-        db_sess = db_session.create_session()
-        db_sess.add(department)
-        db_sess.commit()
+class AddDepartment(FlaskForm):
+    title = StringField('Название департамента', validators=[DataRequired()])
+    chief = IntegerField('Руководитель', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired()])
+    submit = SubmitField('Submit')
 
 
-def add_astro_pilot(commands):
-    for i in range(len(commands)):
-        user = User()
-        user.surname = commands[i]['surname']
-        user.name = commands[i]['name']
-        user.age = commands[i]['age']
-        user.position = commands[i]['position']
-        user.speciality = commands[i]['speciality']
-        user.adress = commands[i]['adress']
-        user.email = commands[i]['email']
-        db_sess = db_session.create_session()
-        db_sess.add(user)
-        db_sess.commit()
+# def add_department(new_departments):
+#     for i in range(len(new_departments)):
+#         department = Department()
+#         department.title = new_departments[i]['title']
+#         department.chief = new_departments[i]['chief']
+#         department.email = new_departments[i]['email']
+#         db_sess = db_session.create_session()
+#         db_sess.add(department)
+#         db_sess.commit()
 
 
-def add_jobs(all_jobs):
-    for i in range(len(all_jobs)):
-        job = Jobs()
-        job.team_leader = all_jobs[i]['team_leader']
-        job.jobs = all_jobs[i]['jobs']
-        job.work_size = all_jobs[i]['work_size']
-        job.collaborators = all_jobs[i]['collaborators']
-        job.is_finished = all_jobs[i]['is_finished']
-        db_sess = db_session.create_session()
-        db_sess.add(job)
-        db_sess.commit()
+# def add_astro_pilot(commands):
+#     for i in range(len(commands)):
+#         user = User()
+#         user.surname = commands[i]['surname']
+#         user.name = commands[i]['name']
+#         user.age = commands[i]['age']
+#         user.position = commands[i]['position']
+#         user.speciality = commands[i]['speciality']
+#         user.adress = commands[i]['adress']
+#         user.email = commands[i]['email']
+#         db_sess = db_session.create_session()
+#         db_sess.add(user)
+#         db_sess.commit()
 
 
-def all_prompt():
-    print('Для завершения пропиши команду End')
-    db_name = input('Введите название базы данных ')
-    try:
-        global_init(f'db/{db_name}.db')
-        db_sess = create_session()
-    except Exception as e:
-        print(f"\nОшибка: {e}\nПроверьте:")
-        print(" Что файл базы существует и доступен")
-        print(" Что существующая база имеет такое название")
-
-    while db_name != 'End':
-        try:
-            global_init(f'db/{db_name}.db')
-            db_sess = create_session()
-            results = ''
-            task = input('Какой запрос вывести? Пример: Запрос 1 ')
-            if task =='Запрос 1':
-                results = db_sess.query(User)
-            elif task =='Запрос 2':
-                results= db_sess.query(User).filter(User.adress == 'module_1')
-            elif task =='Запрос 3':
-                results= db_sess.query(User).filter(User.age < 18)
-            elif task =='Запрос 4':
-                results= db_sess.query(User).filter((User.position == 'chief') |(User.position == 'middle'))
-            elif task =='Запрос 5':
-                results= db_sess.query(Jobs).filter((Jobs.work_size < 20) & (Jobs.is_finished == 0))
-                map(result.__repr__(), results)
-            elif task =='Запрос 6':
-                all_commands = db_sess.query(Jobs).filter(Jobs.collaborators).all()
-                list_el = [(el.collaborators, el.user.surname, el.user.name) for el in all_commands]
-                max_value = max(list_el, key=lambda item:len(item[0]))
-                max_values_in_list = [x for x in list_el if len(x[0].split(',')) == len(max_value[0].split(','))]
-                results =[' '.join([surname, name]) for string, surname, name in set(max_values_in_list)]
-            elif task =='Запрос 7':
-                results= db_sess.query(User).filter((User.adress == 'module_3') & (User.age < 21))
-                for colonist in results:
-                    colonist.adress = 'module_1'
-                    db_sess.commit()
-            elif task == 'Запрос 8':
-                results = (db_sess.query(Jobs).join(User, User.id == Jobs.team_leader)
-                           .join(Department, User.id == Department.chief)
-                           .filter((Department.id==1) & (Jobs.is_finished == 1))
-                           .all())
-                for el in results:
-                    print(el.user.name, el.user.surname)
-            for result in results:
-                print(result)
-            else:
-                raise Exception
+# def add_jobs(all_jobs):
+#     for i in range(len(all_jobs)):
+#         job = Jobs()
+#         job.team_leader = all_jobs[i]['team_leader']
+#         job.jobs = all_jobs[i]['jobs']
+#         job.work_size = all_jobs[i]['work_size']
+#         job.collaborators = all_jobs[i]['collaborators']
+#         job.is_finished = all_jobs[i]['is_finished']
+#         db_sess = db_session.create_session()
+#         db_sess.add(job)
+#         db_sess.commit()
 
 
-        except Exception as e:
-            print(f"\nОшибка: {e}\nПроверьте:")
-            print("1. Что в базе есть нужная таблица")
-            print("2. Что таблица содержит нужный столбец")
-            print("4. Что такой запрос реализован в логике кода")
+# def all_prompt():
+#     print('Для завершения пропиши команду End')
+#     db_name = input('Введите название базы данных ')
+#     try:
+#         global_init(f'db/{db_name}.db')
+#         db_sess = create_session()
+#     except Exception as e:
+#         print(f"\nОшибка: {e}\nПроверьте:")
+#         print(" Что файл базы существует и доступен")
+#         print(" Что существующая база имеет такое название")
+#
+#     while db_name != 'End':
+#         try:
+#             global_init(f'db/{db_name}.db')
+#             db_sess = create_session()
+#             results = ''
+#             task = input('Какой запрос вывести? Пример: Запрос 1 ')
+#             if task =='Запрос 1':
+#                 results = db_sess.query(User)
+#             elif task =='Запрос 2':
+#                 results= db_sess.query(User).filter(User.adress == 'module_1')
+#             elif task =='Запрос 3':
+#                 results= db_sess.query(User).filter(User.age < 18)
+#             elif task =='Запрос 4':
+#                 results= db_sess.query(User).filter((User.position == 'chief') |(User.position == 'middle'))
+#             elif task =='Запрос 5':
+#                 results= db_sess.query(Jobs).filter((Jobs.work_size < 20) & (Jobs.is_finished == 0))
+#                 map(result.__repr__(), results)
+#             elif task =='Запрос 6':
+#                 all_commands = db_sess.query(Jobs).filter(Jobs.collaborators).all()
+#                 list_el = [(el.collaborators, el.user.surname, el.user.name) for el in all_commands]
+#                 max_value = max(list_el, key=lambda item:len(item[0]))
+#                 max_values_in_list = [x for x in list_el if len(x[0].split(',')) == len(max_value[0].split(','))]
+#                 results =[' '.join([surname, name]) for string, surname, name in set(max_values_in_list)]
+#             elif task =='Запрос 7':
+#                 results= db_sess.query(User).filter((User.adress == 'module_3') & (User.age < 21))
+#                 for colonist in results:
+#                     colonist.adress = 'module_1'
+#                     db_sess.commit()
+#             elif task == 'Запрос 8':
+#                 results = (db_sess.query(Jobs).join(User, User.id == Jobs.team_leader)
+#                            .join(Department, User.id == Department.chief)
+#                            .filter((Department.id==1) & (Jobs.is_finished == 1))
+#                            .all())
+#                 for el in results:
+#                     print(el.user.name, el.user.surname)
+#             for result in results:
+#                 print(result)
+#             else:
+#                 raise Exception
+#
+#
+#         except Exception as e:
+#             print(f"\nОшибка: {e}\nПроверьте:")
+#             print("1. Что в базе есть нужная таблица")
+#             print("2. Что таблица содержит нужный столбец")
+#             print("4. Что такой запрос реализован в логике кода")
 
 
 @app.route('/works_book')
@@ -216,6 +223,67 @@ def works_book():
     db_sess = create_session()
     form = db_sess.query(Jobs).all()
     return render_template('table_works_book.html', results=form, user=current_user)
+
+
+@app.route('/department_table')
+@login_required
+def depart_table():
+    db_sess = create_session()
+    form = db_sess.query(Department).all()
+    return render_template('depart_table.html', form=form)
+
+
+@app.route('/add_department', methods=['GET', 'POST'])
+@login_required
+def add_deparment():
+    form = AddDepartment()
+    if form.validate_on_submit():
+        department = Department()
+        department.title = form.title.data
+        department.chief = form.chief.data
+        department.email = form.email.data
+        db_sess = db_session.create_session()
+        db_sess.add(department)
+        db_sess.commit()
+        return redirect('/department_table')
+    return render_template('depart_form.html', title='Adding a department', form=form, user=current_user)
+
+
+@app.route('/depart_delete/<int:id>')
+@login_required
+def depart_delete(id):
+    db_sess = db_session.create_session()
+    depart = db_sess.query(Department).filter(Department.id == id
+                                      ).first()
+    if depart:
+        db_sess.delete(depart)
+        db_sess.commit()
+    else:
+        abort(404)
+    return redirect('/department_table')
+
+
+@app.route('/edit_department/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_depart(id):
+    form = AddDepartment()
+    if request.method == "GET":
+        db_sess = db_session.create_session()
+        department = db_sess.query(Department).filter(Department.id == id).first()
+        if department:
+            form.title.data = department.title
+            form.chief.data = department.chief
+            form.email.data = department.email
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        department = db_sess.query(Department).filter(Department.id == id).first()
+        if department:
+            department.title = form.title.data
+            department.chief = form.chief.data
+            department.email = form.email.data
+            db_sess.commit()
+            return redirect('/department_table')
+    return render_template('depart_form.html', form=form, current_user=current_user, title='Редактирование департамента')
 
 
 @app.route('/works_book/<int:id>', methods=['GET', 'POST'])

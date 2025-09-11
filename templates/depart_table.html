@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block user_name %}
+    {% if user %}
+        <div>{{ user.name }}  {{ user.surname }}</div>
+    {% endif %}
+{% endblock %}
+{% block content %}
+
+<h1>List of Departments</h1>
+<div class="depart-books">
+        <div>
+            <a href="/works_book" class="btn btn-warning">
+                Назад к таблице работ
+            </a>
+            <a href="/add_department" class="btn btn-warning">
+                Добавить
+            </a>
+        </div>
+    {% for department in form %}
+        <h4>Department #{{ department.id }}</h4>
+            {% if current_user.is_authenticated and current_user.id == department.chief %}
+                <div>
+                <a href="/edit_department/{{ department.id }}" class="btn btn-warning">
+                    Изменить
+                </a>
+                 <a href="/depart_delete/{{ department.id }}" class="btn btn-danger">
+                     Удалить
+                 </a>
+                </div>
+            {% elif current_user.is_authenticated and current_user.id == department.chief %}
+                <div>
+                    <a href="/edit_depart/{{ department.id }}" class="btn btn-warning">
+                        Изменить
+                    </a>
+                     <a href="/depart_delete/{{ department.id }}" class="btn btn-danger">
+                         Удалить
+                     </a>
+                </div>
+            {% endif %}
+             <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Chief</th>
+                        <th>Department email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ department.title }}</td>
+                        <td>{{ department.chief }}</td>
+                        <td>{{ department.email }}</td>
+                    </tr>
+                </tbody>
+            </table>
+    {% endfor %}
+</div>
+
+<style>
+.td-fin-status {
+    color: green;
+    font-weight: bold;
+}
+
+.td-not-fin-status {
+    color: red;
+    font-weight: bold;
+}
+</style>
+{% endblock %}
