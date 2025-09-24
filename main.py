@@ -1,20 +1,18 @@
-import login
 from flask import Flask, render_template, url_for, request, redirect
 from flask_wtf import FlaskForm
-from flask_login import LoginManager, UserMixin, login_user
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, SelectMultipleField, RadioField, IntegerField, DateTimeField
-from wtforms.fields.simple import EmailField
+from flask_login import LoginManager
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField, DateTimeField
 from wtforms.validators import DataRequired
-from wtforms.widgets import ListWidget, CheckboxInput
 from dotenv import load_dotenv
 import os
 from data import db_session
 from data.users import User
 from data.jobs import Jobs
 from data.department import Department
-from data.db_session import global_init, create_session
+from data.db_session import create_session
 from flask_login import login_user, current_user, login_required, logout_user
-
+from api import jobs_api
+from requests import get
 
 app = Flask(__name__)
 
@@ -47,7 +45,7 @@ commands = [{'surname': 'Scott', 'name': 'Ridley', 'age': 21,
 
 new_commands = [{'surname': 'Kapoor', 'name': 'Venkat', 'age': 13,
              'position': 'middle', 'speciality': 'ML engineer', 'adress': 'module_2',
-             'email':'vankat_ml@mars.org'},
+             'email':'vankat_ml@mars.org', },
             {'surname': 'Povarenok', 'name': 'Povar', 'age': 17,
              'position': 'chief', 'speciality': 'cooker', 'adress': 'module_3',
              'email': 'cooker_ml@mars.org'}
@@ -120,43 +118,43 @@ class AddDepartment(FlaskForm):
     submit = SubmitField('Submit')
 
 
-# def add_department(new_departments):
-#     for i in range(len(new_departments)):
-#         department = Department()
-#         department.title = new_departments[i]['title']
-#         department.chief = new_departments[i]['chief']
-#         department.email = new_departments[i]['email']
-#         db_sess = db_session.create_session()
-#         db_sess.add(department)
-#         db_sess.commit()
+def add_department(new_departments):
+    for i in range(len(new_departments)):
+        department = Department()
+        department.title = new_departments[i]['title']
+        department.chief = new_departments[i]['chief']
+        department.email = new_departments[i]['email']
+        db_sess = db_session.create_session()
+        db_sess.add(department)
+        db_sess.commit()
 
 
-# def add_astro_pilot(commands):
-#     for i in range(len(commands)):
-#         user = User()
-#         user.surname = commands[i]['surname']
-#         user.name = commands[i]['name']
-#         user.age = commands[i]['age']
-#         user.position = commands[i]['position']
-#         user.speciality = commands[i]['speciality']
-#         user.adress = commands[i]['adress']
-#         user.email = commands[i]['email']
-#         db_sess = db_session.create_session()
-#         db_sess.add(user)
-#         db_sess.commit()
+def add_astro_pilot(commands):
+    for i in range(len(commands)):
+        user = User()
+        user.surname = commands[i]['surname']
+        user.name = commands[i]['name']
+        user.age = commands[i]['age']
+        user.position = commands[i]['position']
+        user.speciality = commands[i]['speciality']
+        user.adress = commands[i]['adress']
+        user.email = commands[i]['email']
+        db_sess = db_session.create_session()
+        db_sess.add(user)
+        db_sess.commit()
 
 
-# def add_jobs(all_jobs):
-#     for i in range(len(all_jobs)):
-#         job = Jobs()
-#         job.team_leader = all_jobs[i]['team_leader']
-#         job.jobs = all_jobs[i]['jobs']
-#         job.work_size = all_jobs[i]['work_size']
-#         job.collaborators = all_jobs[i]['collaborators']
-#         job.is_finished = all_jobs[i]['is_finished']
-#         db_sess = db_session.create_session()
-#         db_sess.add(job)
-#         db_sess.commit()
+def add_jobs(all_jobs):
+    for i in range(len(all_jobs)):
+        job = Jobs()
+        job.team_leader = all_jobs[i]['team_leader']
+        job.jobs = all_jobs[i]['jobs']
+        job.work_size = all_jobs[i]['work_size']
+        job.collaborators = all_jobs[i]['collaborators']
+        job.is_finished = all_jobs[i]['is_finished']
+        db_sess = db_session.create_session()
+        db_sess.add(job)
+        db_sess.commit()
 
 
 # def all_prompt():
@@ -418,9 +416,11 @@ def login():
 
 def main():
     db_session.global_init("db/mars_explorer.db")
+    app.register_blueprint(jobs_api.blueprint)
+    # print(get('http://localhost:5000/api/jobs').json())
     # add_astro_pilot(new_commands)
     # add_jobs(all_jobs)
-    # all_prompt()
+    # # all_prompt()
     # works_book()
     # add_department(new_departments)
 
@@ -761,4 +761,4 @@ def carousel_planet():
 
 if __name__ == '__main__':
     main()
-    app.run(port=8080, host='127.0.0.1')
+    app.run(port=5000, host='127.0.0.1')

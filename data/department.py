@@ -9,5 +9,13 @@ class Department(SqlAlchemyBase):
     title = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     chief = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('users.id'))
     email = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-
     users = orm.relationship('User')
+
+
+    def department_to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'chief': self.chief,
+            'email': self.email
+        }
